@@ -13,6 +13,10 @@ from cv_bridge import CvBridge, CvBridgeError
 color_tracker_window = "Color Tracker"
 
 depth_img = 0
+x_track = 0
+y_track = 0
+
+
 
 class image_converter:
 
@@ -21,6 +25,13 @@ class image_converter:
     cv.NamedWindow("Image window", 1)
     self.bridge = CvBridge()
     self.image_sub = rospy.Subscriber("camera/rgb/image_raw",Image,self.callback)
+  def doResize(self,y,x,img):
+    thumb = cv.CreateMat(x,y,img.type)
+    cv.Resize(img,thumb)
+    return thumb
+
+
+
   def callback(self,data):
     global depth_img
     try:
@@ -29,14 +40,18 @@ class image_converter:
       print e
 
     self.depth_sub = rospy.Subscriber("camera/depth/image_raw",Image,self.callback2)
+#    self.depth_sub = rospy.Subscriber("camera/depth_registered/points",Image,self.callback2)
+#    cv_image = self.doResize(160,120,cv_image)
+#    depth_img = self.doResize(160,120,depth_img)
 
     (cols,rows) = cv.GetSize(cv_image)
+    
     tc = self.trackColor(cv_image)
     if cols > 60 and rows > 60 :
       cv.Circle(cv_image, (tc[0],tc[1]), 20, 255)
       cv.Circle(cv_image, (200,200), 20, 255)
       font = cv.InitFont(cv.CV_FONT_HERSHEY_SIMPLEX, 1, 1, 0, 3, 8) 
-      cv.PutText(cv_image,str(depth_img[tc[0],tc[1]]), (tc[0],tc[1]), font, 255 )
+      cv.PutText(cv_image,str(self.getDepth(tc[0],tc[1],depth_img)), (tc[0],tc[1]), font, 255 )
     cv.ShowImage("Image window", cv_image)
     cv.WaitKey(3)
 
@@ -52,17 +67,21 @@ class image_converter:
     global depth_img
     try:
       cv_image = self.bridge.imgmsg_to_cv(data, "32FC1")
+#      cv_image = self.doResize(320,240,cv_image)
       depth_img = cv_image
     except CvBridgeError, e:
       print e
     return cv_image
 
   def getDepth(self,x,y,img):
-      print 'here'
+      cv.Smooth(img, img, cv.CV_BLUR, 3);
+      depth = img[x,y]
+      return depth
 
   def trackColor(self,img):
+            global x_track, y_track
             #blur the source image to reduce color noise 
-            cv.Smooth(img, img, cv.CV_BLUR, 3); 
+            cv.Smooth(img, img, cv.CV_BLUR, 5); 
             
             #convert the image to hsv(Hue, Saturation, Value) so its  
             #easier to determine the color to track(hue) 
@@ -75,7 +94,7 @@ class image_converter:
             #a hue range for the HSV color model 
             thresholded_img =  cv.CreateImage(cv.GetSize(hsv_img), 8, 1) 
             #cv.InRangeS(hsv_img, (120, 80, 80), (140, 255, 255), thresholded_img) 
-            cv.InRangeS(hsv_img, (160, 80, 80), (180, 255, 255), thresholded_img) 
+            cv.InRangeS(hsv_img, (160, 80, 100), (180, 255, 255), thresholded_img) 
   #          print hsv_img[200,200]
             
             #determine the objects moments and check that the area is large  
@@ -85,14 +104,13 @@ class image_converter:
             area = cv.GetCentralMoment(moments, 0, 0) 
             
             #there can be noise in the video so ignore objects with small areas 
-            x = 0
-            y = 0
             if(area > 100000): 
                 #determine the x and y coordinates of the center of the object 
                 #we are tracking by dividing the 1, 0 and 0, 1 moments by the area 
                 x = cv.GetSpatialMoment(moments, 1, 0)/area 
                 y = cv.GetSpatialMoment(moments, 0, 1)/area 
-            
+                x_track = x
+                y_track = y 
                 #print 'x: ' + str(x) + ' y: ' + str(y) + ' area: ' + str(area) 
                 
                 #create an overlay to mark the center of the tracked object 
@@ -105,7 +123,7 @@ class image_converter:
                # cv.Merge(thresholded_img, None, None, None, img) 
             cv.ShowImage(color_tracker_window, thresholded_img)
            
-            return [int(x),int(y)]  
+            return [int(x_track),int(y_track)]  
 
 def main(args):
   ic = image_converter()
