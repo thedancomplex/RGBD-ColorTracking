@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 import roslib
-roslib.load_manifest('ros_3d_tracker')
+roslib.load_manifest('ros_3d_color_tracker')
 import sys
 import rospy
 import cv
