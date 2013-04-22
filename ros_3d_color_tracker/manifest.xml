@@ -1,0 +1,14 @@
+<package>
+  <description brief="ros_3d_color_tracker">
+
+     ros_3d_color_tracker
+
+  </description>
+  <author>Daniel M. Lofaro</author>
+  <license>BSD</license>
+  <review status="unreviewed" notes=""/>
+  <url>http://ros.org/wiki/ros_3d_color_tracker</url>
+
+</package>
+
+
