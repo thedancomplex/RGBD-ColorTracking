@@ -12,6 +12,8 @@ from cv_bridge import CvBridge, CvBridgeError
 
 color_tracker_window = "Color Tracker"
 
+depth_img = 0
+
 class image_converter:
 
   def __init__(self):
@@ -19,25 +21,44 @@ class image_converter:
     cv.NamedWindow("Image window", 1)
     self.bridge = CvBridge()
     self.image_sub = rospy.Subscriber("camera/rgb/image_raw",Image,self.callback)
-
   def callback(self,data):
+    global depth_img
     try:
       cv_image = self.bridge.imgmsg_to_cv(data, "bgr8")
     except CvBridgeError, e:
       print e
+
+    self.depth_sub = rospy.Subscriber("camera/depth/image_raw",Image,self.callback2)
 
     (cols,rows) = cv.GetSize(cv_image)
     tc = self.trackColor(cv_image)
     if cols > 60 and rows > 60 :
       cv.Circle(cv_image, (tc[0],tc[1]), 20, 255)
       cv.Circle(cv_image, (200,200), 20, 255)
+      font = cv.InitFont(cv.CV_FONT_HERSHEY_SIMPLEX, 1, 1, 0, 3, 8) 
+      cv.PutText(cv_image,str(depth_img[tc[0],tc[1]]), (tc[0],tc[1]), font, 255 )
     cv.ShowImage("Image window", cv_image)
     cv.WaitKey(3)
+
+    print 'img = ',cv_image.width,'x',cv_image.height,' : depth= ',depth_img.width,'x',depth_img.height
+
 
     try:
       self.image_pub.publish(self.bridge.cv_to_imgmsg(cv_image, "bgr8"))
     except CvBridgeError, e:
       print e
+
+  def callback2(self,data):
+    global depth_img
+    try:
+      cv_image = self.bridge.imgmsg_to_cv(data, "32FC1")
+      depth_img = cv_image
+    except CvBridgeError, e:
+      print e
+    return cv_image
+
+  def getDepth(self,x,y,img):
+      print 'here'
 
   def trackColor(self,img):
             #blur the source image to reduce color noise 
@@ -55,7 +76,7 @@ class image_converter:
             thresholded_img =  cv.CreateImage(cv.GetSize(hsv_img), 8, 1) 
             #cv.InRangeS(hsv_img, (120, 80, 80), (140, 255, 255), thresholded_img) 
             cv.InRangeS(hsv_img, (160, 80, 80), (180, 255, 255), thresholded_img) 
-            print hsv_img[200,200]
+  #          print hsv_img[200,200]
             
             #determine the objects moments and check that the area is large  
             #enough to be our object 
