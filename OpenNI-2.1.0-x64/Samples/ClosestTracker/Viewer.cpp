@@ -24,6 +24,9 @@
 #endif
 
 #include "Viewer.h"
+#include <stdio.h>
+#include <OpenNI.h>
+
 
 #if (ONI_PLATFORM == ONI_PLATFORM_MACOSX)
         #include <GLUT/glut.h>
@@ -43,6 +46,11 @@
 #define MIN_CHUNKS_SIZE(data_size, chunk_size)	(MIN_NUM_CHUNKS(data_size, chunk_size) * (chunk_size))
 
 SampleViewer* SampleViewer::ms_self = NULL;
+
+using namespace openni;
+
+void getCenter(openni::VideoFrameRef frame);
+void trackColor(openni::VideoFrameRef frame);
 
 void SampleViewer::glutIdle()
 {
@@ -262,7 +270,28 @@ void SampleViewer::display()
 
 	// Swap the OpenGL display buffers
 	glutSwapBuffers();
+	getCenter(m_depthFrame);
+}
 
+void trackColor(openni::VideoFrameRef frame){
+	const openni::RGB888Pixel* pImageRow = (const openni::RGB888Pixel*)frame.getData();
+	openni::RGB888Pixel* pTexRow = m_pTexMap + frame.getCropOriginY() * m_nTexMapX;
+	int rowSize = frame.getStrideInBytes() / sizeof(openni::RGB888Pixel);
+	for (int y = 0; y < frame.getHeight(); ++y){
+		const openni::RGB888Pixel* pImage = pImageRow;
+//		openni::RGB888Pixel* pTex = pTexRow + frame.getCropOriginX();
+//		for (int x = 0; x < frame.getWidth(); ++x, ++pImage, ++pTex){
+//			*pTex = *pImage;
+//		}
+//	pImageRow += rowSize;
+//	pTexRow += m_nTexMapX;
+	}
+}
+
+void getCenter(openni::VideoFrameRef frame) {
+	DepthPixel* pDepth = (DepthPixel*)frame.getData();
+	int middleIndex = (frame.getHeight()+1)*frame.getWidth()/2;
+	printf("Middle Depth = %8d\n",(long)pDepth[middleIndex]);
 }
 
 void SampleViewer::onKey(unsigned char key, int /*x*/, int /*y*/)
