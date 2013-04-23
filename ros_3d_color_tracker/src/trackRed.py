@@ -25,6 +25,7 @@ class image_converter:
     cv.NamedWindow("Image window", 1)
     self.bridge = CvBridge()
     self.image_sub = rospy.Subscriber("camera/rgb/image_raw",Image,self.callback)
+
   def doResize(self,y,x,img):
     thumb = cv.CreateMat(x,y,img.type)
     cv.Resize(img,thumb)
@@ -46,6 +47,7 @@ class image_converter:
 
     (cols,rows) = cv.GetSize(cv_image)
     
+    print 'img = ',cv_image.width,'x',cv_image.height,' : depth= ',depth_img.width,'x',depth_img.height
     tc = self.trackColor(cv_image)
     if cols > 60 and rows > 60 :
       cv.Circle(cv_image, (tc[0],tc[1]), 20, 255)
@@ -74,8 +76,10 @@ class image_converter:
     return cv_image
 
   def getDepth(self,x,y,img):
-      cv.Smooth(img, img, cv.CV_BLUR, 3);
-      depth = img[x,y]
+      cv.Smooth(img, img, cv.CV_BLUR, 10);
+      print 'x = ',x,' y = ',y
+#      depth = img[x,y]
+      depth = img[y,x]
       return depth
 
   def trackColor(self,img):
@@ -94,7 +98,13 @@ class image_converter:
             #a hue range for the HSV color model 
             thresholded_img =  cv.CreateImage(cv.GetSize(hsv_img), 8, 1) 
             #cv.InRangeS(hsv_img, (120, 80, 80), (140, 255, 255), thresholded_img) 
-            cv.InRangeS(hsv_img, (160, 80, 100), (180, 255, 255), thresholded_img) 
+            ## Red
+            #cv.InRangeS(hsv_img, (160, 80, 100), (180, 255, 255), thresholded_img) 
+            ## Better red?
+            #cv.InRangeS(hsv_img, (0, 80, 100), (20, 255, 255), thresholded_img) 
+
+            ## Yellow
+            cv.InRangeS(hsv_img, (25, 80, 100), (40, 255, 255), thresholded_img) 
   #          print hsv_img[200,200]
             
             #determine the objects moments and check that the area is large  
