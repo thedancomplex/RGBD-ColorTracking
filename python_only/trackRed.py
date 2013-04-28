@@ -95,7 +95,7 @@ def main(args):
 
 #        ppi = Image.open('/home/geovana/tig.png')
 
-#        img2 = Image.fromstring('RGB', imgSize, iRetVal)
+        img2 = Image.fromstring('RGB', imgSize, iRetVal)
         ppi = Image.fromstring('RGB', imgSize, iRetVal)
 
 
