@@ -46,7 +46,8 @@ class colorTracking:
      ppi = Image.fromstring('RGB', imgSize, imgRaw)
      pil_img = ppi.convert('RGB') 
      cvi = np.array(pil_img) 
-     return cv.fromarray(cvi)
+     outImg = cv.fromarray(cvi)
+     return outImg
 
 
 def main(args):
@@ -79,40 +80,10 @@ def main(args):
         iRetVal = rgb.get_synced_image_map_bgr()
 #        iRetVal = rgb.get_raw_image_map_bgr()
         depthMap = depth.map
-#        img = ct.tup2img(iRetVal,depth)
-        img = ct.tup2img(iRetVal,depth)
-#        print type(list(iRetVal))
-#        img2 = Image.fromstring('BGR',(640,480),iRetVal)
-        imgSize = (depthMap.width, depthMap.height)
-#        img2 = Image.fromstring('L', imgSize, iRetVal, 'raw', 'F;16')
 
-
-#        ppi = Image.open('/home/geovana/tig.png')
-
-        img2 = Image.fromstring('RGB', imgSize, iRetVal)
-        ppi = Image.fromstring('RGB', imgSize, iRetVal)
-
-
-#        data = ppi.tostring()
-        data = iRetVal
-        #ci = cv.CreateImage(imgSize, cv.IPL_DEPTH_8U, 3)
-        ci = cv.CreateImage(imgSize, cv.IPL_DEPTH_32F, 3)
-#        cv.SetData(ci, data, len(data))
-        cv.SetData(ci, data, len(data))
-  
-	pil_img = ppi.convert('RGB') 
-        cvi = np.array(pil_img) 
-        
-
-
-        print "img2 = ",img2
-        print "ci   = ",ci
-  #      print type(img2)
-#        print iRetVal[:][2]
-        
-        #img4= cv.LoadImage( 'tig.png' );
-        #cv.ShowImage(rgb_window, img4)
-        cv.ShowImage(rgb_window, cv.fromarray(cvi))
+        cvi = ct.raw2cvImg(iRetVal,depth)
+        print "cvi   = ",cvi
+        cv.ShowImage(rgb_window, cvi)
         x = depthMap.width / 2
         y = depthMap.height / 2
         cv.WaitKey(1)    
