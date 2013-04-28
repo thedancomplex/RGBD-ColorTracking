@@ -41,18 +41,12 @@ class colorTracking:
   def __init__(self):
      tmp = 1
 
-  def tup2img(self, img, depth):
-     a = cv.CV_8UC3
-     imgOut = cv.CreateMat(depth.map.height, depth.map.width,a)
-#     print "len = ", len(img)
-#     array = []
-#     for i in img:
-#         array.append(i)
-#     imrgb = Image.merge('RGB',(r,g,b))
-#     imrgb = Image.fromarray(img).convert('RGB')
-#     print array
-#     print imrgb
-     return imgOut
+  def raw2cvImg(self, imgRaw, depth):
+     imgSize = (depth.map.width, depth.map.height)
+     ppi = Image.fromstring('RGB', imgSize, imgRaw)
+     pil_img = ppi.convert('RGB') 
+     cvi = np.array(pil_img) 
+     return cv.fromarray(cvi)
 
 
 def main(args):
