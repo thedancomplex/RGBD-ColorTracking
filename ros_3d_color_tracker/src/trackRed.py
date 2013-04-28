@@ -42,7 +42,7 @@ class image_converter:
 
     self.depth_sub = rospy.Subscriber("camera/depth/image_raw",Image,self.callback2)
 #    self.depth_sub = rospy.Subscriber("camera/depth_registered/points",Image,self.callback2)
-#    cv_image = self.doResize(160,120,cv_image)
+#    cv_image = self.doResize(320,240,cv_image)
 #    depth_img = self.doResize(160,120,depth_img)
 
     (cols,rows) = cv.GetSize(cv_image)
@@ -64,6 +64,9 @@ class image_converter:
       self.image_pub.publish(self.bridge.cv_to_imgmsg(cv_image, "bgr8"))
     except CvBridgeError, e:
       print e
+    rospy.sleep(0.25)
+
+
 
   def callback2(self,data):
     global depth_img
