@@ -82,8 +82,8 @@ def main(args):
       while True:
         nRetVal = ctx.wait_one_update_all(depth)
 #        iRetVal = rgb.get_tuple_image_map()
-#        iRetVal = rgb.get_synced_image_map_bgr()
-        iRetVal = rgb.get_raw_image_map_bgr()
+        iRetVal = rgb.get_synced_image_map_bgr()
+#        iRetVal = rgb.get_raw_image_map_bgr()
         depthMap = depth.map
 #        img = ct.tup2img(iRetVal,depth)
         img = ct.tup2img(iRetVal,depth)
