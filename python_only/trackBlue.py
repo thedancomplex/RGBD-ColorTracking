@@ -184,6 +184,12 @@ def main(args):
             font = cv.InitFont(cv.CV_FONT_HERSHEY_SIMPLEX, 1, 1, 0, 3, 8)
             cv.PutText(cvi,str(pixel), (x,y), font, 255 )
             cv.Circle(cvi, (x,y), 10, 255)
+            xm = depthMap.width / 2
+            ym = depthMap.height
+            cv.Circle(cvi, (xm,ym), 10, 20)
+            cv.Line(cvi,(x,y),(xm,ym),1)
+            ang = np.arctan2((ym-y),(xm-x)) - np.pi/2
+            cv.PutText(cvi,str(ang), (xm,ym), font, 255 )
             cv.ShowImage(rgb_window, cvi)
             print "The tracked pixel is ", pixel, " millimeters away at ",x,",",y
         else:
