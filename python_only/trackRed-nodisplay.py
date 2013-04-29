@@ -74,8 +74,12 @@ class colorTracking:
             #cv.InRangeS(hsv_img, (120, 80, 80), (140, 255, 255), thresholded_img) 
             ## Red
             #cv.InRangeS(hsv_img, (160, 80, 100), (180, 255, 255), thresholded_img) 
-            ## Better red?
-            cv.InRangeS(hsv_img, (150, 80, 135), (255, 255, 255), thresholded_img) 
+
+            ## Better red
+#            cv.InRangeS(hsv_img, (150, 80, 135), (255, 255, 255), thresholded_img) 
+
+            ## Blue
+            cv.InRangeS(hsv_img, (100, 80, 135), (130, 255, 255), thresholded_img) 
 
             ## another yellow?
 #            cv.InRangeS(hsv_img, (0, 80, 100), (30, 255, 255), thresholded_img) 
@@ -153,10 +157,13 @@ def main(args):
         try:
           iRetVal = rgb.get_synced_image_map_bgr()
           cvi = ct.raw2cvImg(iRetVal,depth)
-          cv.ShowImage(rgb_window, cvi)
           (x,y) = ct.trackColor(cvi)
+
+#          cv.ShowImage(rgb_window, cvi)
         except:
           print "Video: missed frame"
+          x = -1
+          y = -1
         depthMap = depth.map
 
 ##        cvi = ct.raw2cvImg(iRetVal,depth)
@@ -174,10 +181,18 @@ def main(args):
         # Get the pixel at these coordinates
         if (x >= 0):
             pixel = depthMap[x,y]
-            print "The tracked pixel is %d millimeters away." % pixel
+            font = cv.InitFont(cv.CV_FONT_HERSHEY_SIMPLEX, 1, 1, 0, 3, 8)
+            cv.PutText(cvi,str(pixel), (x,y), font, 255 )
+            cv.Circle(cvi, (x,y), 10, 255)
+            cv.ShowImage(rgb_window, cvi)
+            print "The tracked pixel is ", pixel, " millimeters away at ",x,",",y
         else:
             print "No Object"
 
+        try:
+            cv.ShowImage(rgb_window, cvi)
+        except:
+            print "No Image to Display"
       except KeyboardInterrupt:
         print "Shutting down"
         break
