@@ -75,10 +75,13 @@ class colorTracking:
             ## Red
             #cv.InRangeS(hsv_img, (160, 80, 100), (180, 255, 255), thresholded_img) 
             ## Better red?
-            #cv.InRangeS(hsv_img, (0, 80, 100), (20, 255, 255), thresholded_img) 
+            cv.InRangeS(hsv_img, (150, 80, 135), (255, 255, 255), thresholded_img) 
+
+            ## another yellow?
+#            cv.InRangeS(hsv_img, (0, 80, 100), (30, 255, 255), thresholded_img) 
 
             ## Yellow
-            cv.InRangeS(hsv_img, (25, 80, 100), (40, 255, 255), thresholded_img)
+##            cv.InRangeS(hsv_img, (25, 80, 100), (40, 255, 255), thresholded_img)
   #          print hsv_img[200,200]
 
             #determine the objects moments and check that the area is large  
@@ -136,7 +139,7 @@ def main(args):
     # Start generating
     ctx.start_generating_all()
     cv.NamedWindow(rgb_window, 0)
-    cv.NamedWindow(color_tracker_window, 0)
+    cv.NamedWindow(color_tracker_window, 1)
     x = -1
     y = -1
 #    try:
@@ -166,7 +169,8 @@ def main(args):
 #        cv.ShowImage(rgb_window, cvi)
 #        x = depthMap.width / 2
 #        y = depthMap.height / 2
-        cv.WaitKey(1000)    
+##        cv.WaitKey(1000)    
+        cv.WaitKey(10)    
         # Get the pixel at these coordinates
         if (x >= 0):
             pixel = depthMap[x,y]
@@ -177,7 +181,7 @@ def main(args):
       except KeyboardInterrupt:
         print "Shutting down"
         break
-      cv.DestroyAllWindows()
+    cv.DestroyAllWindows()
  
 if __name__ == '__main__':
     main(sys.argv)
