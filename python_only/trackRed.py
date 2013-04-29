@@ -84,6 +84,8 @@ class colorTracking:
             #determine the objects moments and check that the area is large  
             #enough to be our object 
             thresholded_img_mat = cv.GetMat(thresholded_img)
+            cv.Erode(thresholded_img,thresholded_img,None,2)
+            cv.Dilate(thresholded_img,thresholded_img,None,2)
             moments = cv.Moments(thresholded_img_mat, 0)
             area = cv.GetCentralMoment(moments, 0, 0)
 
