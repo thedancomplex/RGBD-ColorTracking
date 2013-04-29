@@ -37,6 +37,13 @@ from openni import *
 from PIL import Image
 from numpy import eye 
 
+
+color_tracker_window = "Color Tracking Window"
+rgb_window = "RGB Window"
+
+
+
+
 class colorTracking:
   def __init__(self):
      tmp = 1
@@ -48,6 +55,62 @@ class colorTracking:
      cvi = np.array(pil_img) 
      outImg = cv.fromarray(cvi)
      return outImg
+
+
+  def trackColor(self,img):
+            #blur the source image to reduce color noise 
+            cv.Smooth(img, img, cv.CV_BLUR, 5);
+
+            #convert the image to hsv(Hue, Saturation, Value) so its  
+            #easier to determine the color to track(hue) 
+            hsv_img = cv.CreateImage(cv.GetSize(img), 8, 3)
+            cv.CvtColor(img, hsv_img, cv.CV_BGR2HSV)
+
+            #limit all pixels that don't match our criteria, in this case we are  
+            #looking for purple but if you want you can adjust the first value in  
+            #both turples which is the hue range(120,140).  OpenCV uses 0-180 as  
+            #a hue range for the HSV color model 
+            thresholded_img =  cv.CreateImage(cv.GetSize(hsv_img), 8, 1)
+            #cv.InRangeS(hsv_img, (120, 80, 80), (140, 255, 255), thresholded_img) 
+            ## Red
+            #cv.InRangeS(hsv_img, (160, 80, 100), (180, 255, 255), thresholded_img) 
+            ## Better red?
+            #cv.InRangeS(hsv_img, (0, 80, 100), (20, 255, 255), thresholded_img) 
+
+            ## Yellow
+            cv.InRangeS(hsv_img, (25, 80, 100), (40, 255, 255), thresholded_img)
+  #          print hsv_img[200,200]
+
+            #determine the objects moments and check that the area is large  
+            #enough to be our object 
+            thresholded_img_mat = cv.GetMat(thresholded_img)
+            moments = cv.Moments(thresholded_img_mat, 0)
+            area = cv.GetCentralMoment(moments, 0, 0)
+
+
+            #there can be noise in the video so ignore objects with small areas 
+            x = -1;
+            y = -1;
+            if(area > 100000):
+                #determine the x and y coordinates of the center of the object 
+                #we are tracking by dividing the 1, 0 and 0, 1 moments by the area 
+                x = cv.GetSpatialMoment(moments, 1, 0)/area
+                y = cv.GetSpatialMoment(moments, 0, 1)/area
+                #print 'x: ' + str(x) + ' y: ' + str(y) + ' area: ' + str(area) 
+
+                #create an overlay to mark the center of the tracked object 
+                overlay = cv.CreateImage(cv.GetSize(img), 8, 3)
+
+               # cv.Circle(overlay, (x, y), 2, (255, 255, 255), 20) 
+               # cv.Add(img, overlay, img) 
+                #add the thresholded image back to the img so we can see what was  
+                #left after it was applied 
+               # cv.Merge(thresholded_img, None, None, None, img) 
+            cv.ShowImage(color_tracker_window, thresholded_img)
+
+            return [int(x),int(y)]
+
+
 
 
 def main(args):
@@ -70,8 +133,8 @@ def main(args):
 
     # Start generating
     ctx.start_generating_all()
-    rgb_window = "RGB"
     cv.NamedWindow(rgb_window, 0)
+    cv.NamedWindow(color_tracker_window, 0)
 
     try:
       while True:
@@ -82,15 +145,23 @@ def main(args):
         depthMap = depth.map
 
         cvi = ct.raw2cvImg(iRetVal,depth)
-        print "cvi   = ",cvi
+
+        # Track the Color
+        (x,y) = ct.trackColor(cvi)
+
+
+
+
         cv.ShowImage(rgb_window, cvi)
-        x = depthMap.width / 2
-        y = depthMap.height / 2
+#        x = depthMap.width / 2
+#        y = depthMap.height / 2
         cv.WaitKey(1)    
         # Get the pixel at these coordinates
-        pixel = depthMap[x,y]
-
-        print "The middle pixel is %d millimeters away." % pixel
+        if (x >= 0):
+            pixel = depthMap[x,y]
+            print "The tracked pixel is %d millimeters away." % pixel
+        else:
+            print "No Object"
 
     except KeyboardInterrupt:
       print "Shutting down"
