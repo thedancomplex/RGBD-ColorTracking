@@ -123,6 +123,25 @@ class colorTracking:
 
 
 def main(args):
+    # verticle and horrozontal indexing
+    h = 0
+    v = 1
+
+    # Hubo height from head to ground when crouched
+    Lh = 1.1  #
+
+    # Hubo angle of sensor from parallel to ground
+    th = -np.pi/4
+
+    # Field of view (h, v) -- Shortfield camera
+    fv = (np.radians(57.5), np.radians(45.0))
+    
+    # Default Mid Point
+    p0 = (640/2, 480/2)
+
+     
+
+
     ct = colorTracking()
     ctx = Context()
     ctx.init()
